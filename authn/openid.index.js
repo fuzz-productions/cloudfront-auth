@@ -109,16 +109,21 @@ function mainProcess(event, context, callback) {
       unauthorized('No Code Found', '', '', callback);
     }
     config.TOKEN_REQUEST.code = queryDict.code;
+    const options = { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }};
 
-      // Exchange code for authorization token
-      const postData = qs.stringify(config.TOKEN_REQUEST);
-      const basic = Buffer.from(`${config.TOKEN_REQUEST.client_id}:${config.TOKEN_REQUEST.client_secret}`, 'utf8').toString('base64')
-      const options = { headers: { 'Authorization': `Basic ${basic}` }};
+    if (config.TOKEN_REQUEST.client_secret){
+        const basic = Buffer.from(`${config.TOKEN_REQUEST.client_id}:${config.TOKEN_REQUEST.client_secret}`, 'utf8').toString('base64')
+        options.headers['Authorization'] = `Basic ${basic}`;
+    } else {
+        delete config.TOKEN_REQUEST.client_secret
+    }
 
-      console.log("Requesting access token.");
-      console.log(discoveryDocument.token_endpoint, postData, options);
+    // Exchange code for authorization token
+    const postData = qs.stringify(config.TOKEN_REQUEST);
+    console.log("Requesting access token.");
+    console.log(discoveryDocument.token_endpoint, postData, options);
 
-      axios.post(discoveryDocument.token_endpoint, postData, options)
+    axios.post(discoveryDocument.token_endpoint, postData, options)
       .then(function(response) {
         console.log(response);
         const decodedData = jwt.decode(response.data.id_token, {complete: true});
@@ -205,7 +210,7 @@ function mainProcess(event, context, callback) {
             }
           });
         } catch (error) {
-          console.log("Internal server error: " + error.message);
+          console.log("Internal server error: " + error.message + error);
           internalServerError(callback);
         }
       })
@@ -251,6 +256,7 @@ function redirect(request, headers, callback) {
 
   // Redirect to Authorization Server
   var querystring = qs.stringify(config.AUTH_REQUEST);
+  console.log(discoveryDocument.authorization_endpoint + '?' + querystring);
 
   const response = {
     "status": "302",

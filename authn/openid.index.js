@@ -110,10 +110,15 @@ function mainProcess(event, context, callback) {
     }
     config.TOKEN_REQUEST.code = queryDict.code;
 
-    // Exchange code for authorization token
-    const postData = qs.stringify(config.TOKEN_REQUEST);
-    console.log("Requesting access token.");
-    axios.post(discoveryDocument.token_endpoint, postData)
+      // Exchange code for authorization token
+      const postData = qs.stringify(config.TOKEN_REQUEST);
+      const basic = Buffer.from(`${config.TOKEN_REQUEST.client_id}:${config.TOKEN_REQUEST.client_secret}`, 'utf8').toString('base64')
+      const options = { headers: { 'Authorization': `Basic ${basic}` }};
+
+      console.log("Requesting access token.");
+      console.log(discoveryDocument.token_endpoint, postData, options);
+
+      axios.post(discoveryDocument.token_endpoint, postData, options)
       .then(function(response) {
         console.log(response);
         const decodedData = jwt.decode(response.data.id_token, {complete: true});
@@ -136,7 +141,7 @@ function mainProcess(event, context, callback) {
               switch (err.name) {
                 case 'TokenExpiredError':
                   console.log("Token expired, redirecting to OIDC provider.");
-                  redirect(request, headers, callback)
+                  redirect(request, headers, callback);
                   break;
                 case 'JsonWebTokenError':
                   console.log("JWT error, unauthorized.");
@@ -218,7 +223,7 @@ function mainProcess(event, context, callback) {
         switch (err.name) {
           case 'TokenExpiredError':
             console.log("Token expired, redirecting to OIDC provider.");
-            redirect(request, headers, callback)
+            redirect(request, headers, callback);
             break;
           case 'JsonWebTokenError':
             console.log("JWT error, unauthorized.");

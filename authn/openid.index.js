@@ -114,14 +114,12 @@ function mainProcess(event, context, callback) {
     if (config.TOKEN_REQUEST.client_secret){
         const basic = Buffer.from(`${config.TOKEN_REQUEST.client_id}:${config.TOKEN_REQUEST.client_secret}`, 'utf8').toString('base64')
         options.headers['Authorization'] = `Basic ${basic}`;
-    } else {
-        delete config.TOKEN_REQUEST.client_secret
     }
+    delete config.TOKEN_REQUEST.client_secret
 
     // Exchange code for authorization token
     const postData = qs.stringify(config.TOKEN_REQUEST);
     console.log("Requesting access token.");
-    console.log(discoveryDocument.token_endpoint, postData, options);
 
     axios.post(discoveryDocument.token_endpoint, postData, options)
       .then(function(response) {

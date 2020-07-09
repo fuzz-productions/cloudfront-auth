@@ -108,17 +108,20 @@ function mainProcess(event, context, callback) {
     if (!queryDict.code) {
       unauthorized('No Code Found', '', '', callback);
     }
-    config.TOKEN_REQUEST.code = queryDict.code;
+    config.TOKEN_REQUEST.code = ;
     const options = { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }};
 
     if (config.TOKEN_REQUEST.client_secret){
         const basic = Buffer.from(`${config.TOKEN_REQUEST.client_id}:${config.TOKEN_REQUEST.client_secret}`, 'utf8').toString('base64')
         options.headers['Authorization'] = `Basic ${basic}`;
     }
-    delete config.TOKEN_REQUEST.client_secret
+
+    var queryParams = Object.assign({}, config.TOKEN_REQUEST);
+    queryParams.code = queryDict.code;
+    delete queryParams.client_secret;
 
     // Exchange code for authorization token
-    const postData = qs.stringify(config.TOKEN_REQUEST);
+    const postData = qs.stringify(queryParams);
     console.log("Requesting access token.");
 
     axios.post(discoveryDocument.token_endpoint, postData, options)

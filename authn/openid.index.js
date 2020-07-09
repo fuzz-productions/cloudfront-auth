@@ -108,7 +108,7 @@ function mainProcess(event, context, callback) {
     if (!queryDict.code) {
       unauthorized('No Code Found', '', '', callback);
     }
-    config.TOKEN_REQUEST.code = ;
+    
     const options = { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }};
 
     if (config.TOKEN_REQUEST.client_secret){
